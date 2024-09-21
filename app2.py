@@ -16,12 +16,20 @@ vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(df['question'])
 
 # Function to get the best matching answer
-def get_answer(user_question):
+def get_answer(user_question, threshold=0.3):  # Added a threshold argument
     user_question = preprocess(user_question)
     user_tfidf = vectorizer.transform([user_question])
     cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
+    
+    # Get the best match and its similarity score
     best_match_index = cosine_similarities.argmax()
-    return df['answer'].iloc[best_match_index]
+    best_similarity_score = cosine_similarities[best_match_index]
+    
+    # Check if the similarity score is above the threshold
+    if best_similarity_score >= threshold:
+        return df['answer'].iloc[best_match_index]
+    else:
+        return "خارج المنهج"  # Return this if the question is out of scope
 
 # Streamlit app setup
 st.title('Question Answering Model')
@@ -35,8 +43,8 @@ user_input = st.text_input("Type your question here:")
 
 # When the user submits the question
 if user_input:
-    # Get the best answer using the TF-IDF model
-    answer = get_answer(user_input)
+    # Get the best answer using the TF-IDF model with a threshold
+    answer = get_answer(user_input, threshold=0.3)  # You can adjust the threshold as needed
     
     # Display the user's question and the model's answer
     st.write(f"**You asked:** {user_input}")
