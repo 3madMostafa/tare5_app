@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+import streamlit as st
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -54,18 +54,17 @@ def search_google(query):
     # Return fallback message if no Wikipedia result is found
     return "المعذرة، لا توجد إجابة متاحة في الوقت الحالي."
 
-# Flask app
-app = Flask(__name__)
+# Streamlit app
+st.title("Question Answering App")
 
-@app.route('/')
-def index():
-    return render_template('index.html')  # Create an HTML template for user interaction
+# Input box for user question
+user_question = st.text_input("Ask a question:")
 
-@app.route('/ask', methods=['POST'])
-def ask():
-    user_question = request.form['question']
-    answer = get_answer(user_question)
-    return render_template('index.html', question=user_question, answer=answer)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+if st.button("Submit"):
+    if user_question:
+        # Get the answer for the user question
+        answer = get_answer(user_question)
+        
+        # Display the question and answer
+        st.write(f"**You asked:** {user_question}")
+        st.write(f"**Answer:** {answer}")
