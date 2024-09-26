@@ -1,5 +1,5 @@
-Flask==2.1.1
-pandas==1.4.2
-scikit-learn==1.0.2
-numpy==1.22.3
-google-search-results==2.0.0
+Flask>=2.0.0,<3.0.0
+pandas>=1.0.0,<2.0.0
+scikit-learn>=1.0.0,<2.0.0
+numpy>=1.21.0,<2.0.0
+google-search-results>=1.0.0
