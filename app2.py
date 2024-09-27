@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # Load dataset
-dataset_path = "C:\\Users\\Administrator\\Downloads\\cleaned_output_questions (1).csv"
+dataset_path = "cleaned_output_questions (1).csv"
 df = pd.read_csv(dataset_path)
 
 # Preprocess and vectorize question
