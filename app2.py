@@ -1,4 +1,4 @@
-pip install serpapi
+!pip install serpapi
 
 import streamlit as st
 import pandas as pd
