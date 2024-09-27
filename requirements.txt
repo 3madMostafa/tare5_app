@@ -2,4 +2,6 @@ streamlit
 pandas
 scikit-learn
 numpy
-google-search-results
+serpapi
+requests
+beautifulsoup4
