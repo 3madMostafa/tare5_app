@@ -4,9 +4,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from serpapi import GoogleSearch
+import requests
+from bs4 import BeautifulSoup
 
 # Load dataset
-dataset_path = "cleaned_output_questions (1).csv"
+dataset_path = "C:\\Users\\Administrator\\Downloads\\cleaned_output_questions (1).csv"
 df = pd.read_csv(dataset_path)
 
 # Preprocess and vectorize question
@@ -36,6 +38,26 @@ def get_answer(user_question):
         # Return the best-matching answer from the dataset
         return df['answer'].iloc[best_match_index]
 
+# Function to scrape Wikipedia and get the first statement
+def scrape_wikipedia(url):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Find the first paragraph in the Wikipedia article
+        paragraphs = soup.find_all('p')
+        for paragraph in paragraphs:
+            # Clean the paragraph text and find the first full statement ending with '.'
+            paragraph_text = paragraph.get_text().strip()
+            sentences = paragraph_text.split('.')
+            if sentences:
+                first_sentence = sentences[0].strip() + '.'
+                return first_sentence
+        return "المعذرة، لا توجد إجابة متاحة في الوقت الحالي."
+    
+    except Exception as e:
+        return "حدث خطأ أثناء الوصول إلى صفحة ويكيبيديا."
+
 # Function to search Google and get Wikipedia result
 def search_google(query):
     search_params = {
@@ -46,18 +68,22 @@ def search_google(query):
     search = GoogleSearch(search_params)
     results = search.get_dict()
     
-    # Extract the first Wikipedia result
+    # Extract the first Wikipedia result URL
     for result in results.get('organic_results', []):
         if 'wikipedia.org' in result.get('link', ''):
-            return result.get('snippet', 'المعذرة، لا توجد إجابة متاحة في الوقت الحالي.')
+            wikipedia_url = result.get('link')
+            return scrape_wikipedia(wikipedia_url)
     
     # Return fallback message if no Wikipedia result is found
     return "المعذرة، لا توجد إجابة متاحة في الوقت الحالي."
 
 # Streamlit app layout
-st.title('Question Answering System')
+st.title("Arabic Question Answering System")
 
+# Input from the user
 user_question = st.text_input("اكتب سؤالك هنا:")
+
+# Button to submit the question
 if st.button("إرسال"):
     if user_question:
         answer = get_answer(user_question)
@@ -65,4 +91,3 @@ if st.button("إرسال"):
         st.write(f"الإجابة: {answer}")
     else:
         st.write("يرجى إدخال سؤال")
-
