@@ -3,5 +3,3 @@ pandas
 scikit-learn
 numpy
 serpapi
-requests
-beautifulsoup4
