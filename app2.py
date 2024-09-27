@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+from serpapi import GoogleSearch
 
 # Load dataset
 dataset_path = "cleaned_output_questions (1).csv"
@@ -16,6 +17,9 @@ df['question'] = df['question'].apply(preprocess)
 vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(df['question'])
 
+# SerpAPI settings
+SERP_API_KEY = "3f2546369d64be3f711f4d6f1b52afbf002d4b0b42095838402413f0b135fadb"
+
 # Function to get the best matching answer
 def get_answer(user_question):
     user_question = preprocess(user_question)
@@ -26,18 +30,39 @@ def get_answer(user_question):
     # Set a threshold for similarity
     similarity_threshold = 0.8
     if cosine_similarities[best_match_index] < similarity_threshold:
-        # If below threshold, return fallback message
-        return "المعذرة، لا توجد إجابة متاحة في الوقت الحالي."
+        # If below threshold, search on Google
+        return search_google(user_question)
     else:
         # Return the best-matching answer from the dataset
         return df['answer'].iloc[best_match_index]
 
-# Streamlit UI setup
-st.title("Question Answer App")
-user_question = st.text_input("Ask a question:")
+# Function to search Google and get Wikipedia result
+def search_google(query):
+    search_params = {
+        "q": query + " site:wikipedia.org",  # Search specifically in Wikipedia
+        "api_key": SERP_API_KEY
+    }
+    
+    search = GoogleSearch(search_params)
+    results = search.get_dict()
+    
+    # Extract the first Wikipedia result
+    for result in results.get('organic_results', []):
+        if 'wikipedia.org' in result.get('link', ''):
+            return result.get('snippet', 'المعذرة، لا توجد إجابة متاحة في الوقت الحالي.')
+    
+    # Return fallback message if no Wikipedia result is found
+    return "المعذرة، لا توجد إجابة متاحة في الوقت الحالي."
 
-if st.button("Submit"):
+# Streamlit app layout
+st.title('Question Answering System')
+
+user_question = st.text_input("اكتب سؤالك هنا:")
+if st.button("إرسال"):
     if user_question:
         answer = get_answer(user_question)
-        st.write(f"**You asked:** {user_question}")
-        st.write(f"**Answer:** {answer}")
+        st.write(f"السؤال: {user_question}")
+        st.write(f"الإجابة: {answer}")
+    else:
+        st.write("يرجى إدخال سؤال")
+
